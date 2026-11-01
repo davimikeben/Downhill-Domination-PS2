@@ -15,8 +15,10 @@ com **emoji em cada tecla**, e traz ajustes prontos para rodar em **GPU fraca (M
 
 ## 1. Baixar o APK
 
-Pegue `app-release.apk` na aba **Releases** deste repositório e instale no celular
-(Android 7.0+ / `minSdk 24`). O APK é **assinado** e não pede root.
+**[⬇ DownhillDominationMobile-1.0.1.apk](https://github.com/davimikeben/Downhill-Domination-PS2/releases/download/v1.0.1/DownhillDominationMobile-1.0.1.apk)**
+
+Instale no celular (Android 7.0+ / `minSdk 24`). O APK é **assinado** (esquema v2) e não
+pede root. `sha256 8b9c485e6378da8f6ebfca99622d525a5b18a2034f66a0cc428461a92ac6610d`.
 
 ## 2. O jogo
 
@@ -91,6 +93,8 @@ toa — o contador de quadros do *Pad Lab* existe para você conferir isso na su
 - **Exportar pad**: gera `downhill-pad.cfg` + `downhill-pad.png` + `LEIA-ME.txt` e manda
   pelo compartilhamento — o mesmo pad, agora dentro do RetroArch
   (`Settings › On-Screen Display › On-Screen Overlay › Overlay Preset`).
+  Um exemplo já gerado por esse código está em [`docs/downhill-pad.cfg`](docs/downhill-pad.cfg)
+  (23 descritores: 21 teclas + os dois analógicos).
 
 Mapa usado no RetroArch: `✕→btn_b`, `○→btn_a`, `□→btn_y`, `△→btn_x`, `L1/R1→btn_l/btn_r`,
 `L2/R2→btn_l2/btn_r2`, `L3/R3→btn_l3/btn_r3`, `Select/Start→btn_select/btn_start`,
@@ -122,6 +126,8 @@ app/src/main/java/com/downhill/mobile/
 ```
 
 ## 8. Testes
+
+O log da verificação completa está em [`docs/verification.txt`](docs/verification.txt).
 
 `gradle :app:testDebugUnitTest` roda 44 testes JVM:
 

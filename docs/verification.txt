@@ -1,0 +1,32 @@
+Verificação executada neste repositório
+=======================================
+
+1) Caminho de importação do app rodando contra o arquivo real do usuário
+   (Downhill Domination (Europe) (En,Fr,De,Es,It).zip, 2.421.295.952 bytes)
+
+   zip      : 2421295952 bytes
+   iso      : 2771025920 bytes (extraído em 10,6 s, buffer de 1 MB)
+   crc      : validado pelo ZipInputStream (nenhum ZipException)
+   label    : DOWNHILLDOMINATION
+   boot2    : cdrom0:\SLES_522.02;1
+   serial   : SLES-52202 (PAL)
+   downhill : true
+   => resultado: OK
+
+2) Testes automatizados (gradle :app:testDebugUnitTest) -> 45 testes, 0 falhas
+   - pad/PadGeometryTest            geometria em 8 tamanhos de tela, hit-test, sem sobreposição
+   - pad/Ps2ButtonTest              21 teclas, emoji + dica, códigos de gamepad únicos
+   - rom/IsoParserTest              ISO 9660 sintético (PAL/NTSC-U), lixo, rótulo de volume
+   - rom/RomExtractorTest           zip->iso, iso cru, zip sem imagem, download truncado, cancelamento
+   - export/RetroArchOverlayTest    .cfg bem formado, coordenadas 0..1, mapa DualShock->RetroPad
+   - emu/*                          detecção de núcleos e tabela de otimização Mali-G52
+   - AppSmokeTest (Robolectric)     MainActivity, PadLab e Legend abertos; import zip->iso->serial;
+                                    export dos 3 arquivos; provider somente leitura
+   - PadRenderTest (Skia nativo)    pad rasterizado 1920x1080, pixels conferidos, tecla pressionada muda
+
+3) APK publicado
+   v1.0.1 / DownhillDominationMobile-1.0.1.apk
+   sha256 8b9c485e6378da8f6ebfca99622d525a5b18a2034f66a0cc428461a92ac6610d
+   apksigner: Verified using v2 scheme (APK Signature Scheme v2): true
+   aapt2: package com.downhill.mobile versionCode=2 versionName=1.0.1 minSdk=24 targetSdk=34
+          launchable-activity com.downhill.mobile.MainActivity
