@@ -33,5 +33,9 @@ Verificação executada neste repositório (2.0.0)
    emu/EmulatorTargetTest, emu/TuningProfileTest, AppSmokeTest (Robolectric),
    PadRenderTest (Skia nativo: pad rasterizado, pixels e estado pressionado conferidos)
 
-6) APK
-   DownhillDominationMobile-2.0.0.apk, assinado (v2), minSdk 24, targetSdk 34
+6) APK publicado
+   DownhillDominationMobile-2.0.0.apk
+   versionCode 3 / versionName 2.0.0 / minSdk 24 / targetSdk 34
+   sha256 74684e72b728fb6a4c9b67f5440aed626eebb599bbea57c806d68c78e1dbfd6e
+   apksigner: "Verifies" (APK Signature Scheme v2)
+   assets da release: 2 partes CSO (1.250.210.244 cada), APK, 2 previews do pad
