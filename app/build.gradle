@@ -1,0 +1,69 @@
+plugins {
+    id 'com.android.application'
+}
+
+android {
+    namespace 'com.downhill.mobile'
+    compileSdk 34
+
+    defaultConfig {
+        applicationId 'com.downhill.mobile'
+        minSdk 24
+        targetSdk 34
+        versionCode 1
+        versionName '1.0.0'
+        ndk { abiFilters 'arm64-v8a', 'armeabi-v7a' }
+        resourceConfigurations += ['pt', 'en']
+    }
+
+    signingConfigs {
+        release {
+            storeFile file('../signing/downhill-release.jks')
+            storePassword 'downhill2026'
+            keyAlias 'downhill'
+            keyPassword 'downhill2026'
+        }
+    }
+
+    buildTypes {
+        debug {
+            applicationIdSuffix '.debug'
+            minifyEnabled false
+            debuggable true
+        }
+        release {
+            minifyEnabled true
+            shrinkResources true
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            signingConfig signingConfigs.release
+        }
+    }
+
+    buildFeatures {
+        aidl true
+        buildConfig true
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+
+    packagingOptions {
+        resources.excludes += ['META-INF/*.kotlin_module', 'META-INF/*.version', 'DebugProbesKt.bin']
+    }
+
+    lint {
+        abortOnError false
+        checkReleaseBuilds false
+    }
+
+    testOptions {
+        unitTests.all { it.testLogging { events 'passed', 'failed', 'skipped' } }
+    }
+}
+
+dependencies {
+    implementation 'dev.rikka.shizuku:api:13.1.5'
+    testImplementation 'junit:junit:4.13.2'
+}

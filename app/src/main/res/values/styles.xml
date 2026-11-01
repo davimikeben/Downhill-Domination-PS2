@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="Theme.Downhill" parent="android:Theme.Material.NoActionBar">
+        <item name="android:windowBackground">@color/bg_deep</item>
+        <item name="android:colorPrimary">@color/accent_orange</item>
+        <item name="android:colorAccent">@color/accent_cyan</item>
+        <item name="android:statusBarColor">#00000000</item>
+        <item name="android:navigationBarColor">#00000000</item>
+        <item name="android:windowLightStatusBar">false</item>
+        <item name="android:windowDrawsSystemBarBackgrounds">true</item>
+    </style>
+
+    <style name="Theme.Downhill.Fullscreen" parent="Theme.Downhill">
+        <item name="android:windowFullscreen">true</item>
+        <item name="android:windowLayoutInDisplayCutoutMode">shortEdges</item>
+    </style>
+
+    <style name="Downhill.Button" parent="android:Widget.Material.Button">
+        <item name="android:backgroundTint">@color/bg_surface</item>
+        <item name="android:textColor">@color/text_primary</item>
+    </style>
+</resources>

@@ -1,0 +1,5 @@
+-keep class com.downhill.mobile.input.PadInputService { *; }
+-keep interface com.downhill.mobile.input.IPadInput { *; }
+-keepclassmembers class * implements android.os.Parcelable { public static final ** CREATOR; }
+-dontwarn rikka.shizuku.**
+-dontwarn android.content.pm.**
