@@ -14,6 +14,8 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -98,6 +100,97 @@ public final class ZipRomImporter {
             main.post(() -> callback.onFinished(parsed, failure));
         });
         worker.shutdown();
+    }
+
+    /**
+     * Concatenates the split CSO parts of the release into {@code downhill.cso}.
+     *
+     * <p>The parts can be selected in any order: they are sorted by their numeric
+     * suffix ({@code .000}, {@code .001}) and the result is byte-identical to the
+     * published CSO, which the joiner verifies by size.</p>
+     */
+    public void startJoin(final List<Uri> parts, final Callback callback) {
+        cancelled.set(false);
+        worker.execute(() -> {
+            String error = null;
+            IsoInfo info = null;
+            try {
+                if (parts == null || parts.isEmpty()) {
+                    throw new IOException("Nenhuma parte selecionada.");
+                }
+                List<Uri> ordered = orderByPartName(parts);
+                long free = store.freeBytes();
+                if (free > 0 && free < 2_900_000_000L) {
+                    throw new IOException(String.format(Locale.US,
+                            "Espaço insuficiente: o jogo completo precisa de 2,5 GB livres "
+                                    + "(livre agora: %.2f GB).", free / 1073741824.0));
+                }
+                File target = store.joinPartFile();
+                List<InputStream> streams = new ArrayList<>();
+                long written;
+                try (BufferedOutputStream out = new BufferedOutputStream(
+                        new FileOutputStream(target, false), BUFFER)) {
+                    for (Uri uri : ordered) {
+                        streams.add(app.getContentResolver().openInputStream(uri));
+                    }
+                    written = PartJoiner.join(streams, out,
+                            (done, total) -> post(callback, done, 2_500_000_000L, "Juntando as partes..."),
+                            cancelled::get);
+                } finally {
+                    for (InputStream in : streams) {
+                        if (in != null) {
+                            try {
+                                in.close();
+                            } catch (IOException ignored) {
+                                // best effort
+                            }
+                        }
+                    }
+                }
+                if (cancelled.get()) {
+                    target.delete();
+                    throw new IOException("Junção cancelada.");
+                }
+                File cso = store.csoFile();
+                if (cso.exists() && !cso.delete()) {
+                    throw new IOException("Não foi possível substituir o arquivo anterior.");
+                }
+                if (!target.renameTo(cso)) {
+                    throw new IOException("Não foi possível finalizar o arquivo juntado.");
+                }
+                post(callback, written, written, "Verificando o jogo...");
+                info = store.sniffInfo();
+                File iso = store.isoFile();
+                if (iso.exists()) {
+                    iso.delete();
+                }
+            } catch (IOException | RuntimeException e) {
+                error = e.getMessage() == null ? e.toString() : e.getMessage();
+            }
+            final IsoInfo parsed = info;
+            final String failure = error;
+            main.post(() -> callback.onFinished(parsed, failure));
+        });
+        worker.shutdown();
+    }
+
+    /** Sorts the picked documents by their part suffix; unreadable names go last. */
+    private List<Uri> orderByPartName(List<Uri> parts) {
+        List<String> names = new ArrayList<>();
+        for (Uri uri : parts) {
+            names.add(displayName(uri));
+        }
+        List<String> sorted = PartJoiner.sortedParts(names);
+        List<Uri> ordered = new ArrayList<>();
+        for (String name : sorted) {
+            for (Uri uri : parts) {
+                if (displayName(uri).equals(name) && !ordered.contains(uri)) {
+                    ordered.add(uri);
+                    break;
+                }
+            }
+        }
+        return ordered;
     }
 
     // ------------------------------------------------------------- sources --

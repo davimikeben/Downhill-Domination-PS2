@@ -64,7 +64,9 @@ public class PadRenderTest {
             assertTrue(b + " is invisible at its centre", (c >>> 24) > 0x40);
         }
 
-        save(bmp, "build/pad-preview.png");
+        save(bmp, "build/pad-overlay.png");
+        save(PadBitmap.renderPreview(EnumSet.noneOf(Ps2Button.class), null, null),
+                "build/pad-preview.png");
     }
 
     @Test
@@ -77,19 +79,27 @@ public class PadRenderTest {
         new PadPainter().draw(new Canvas(pressed), geo, EnumSet.of(Ps2Button.CROSS),
                 new float[]{0.7f, -0.4f}, null);
 
-        int cross = idle.getPixel((int) geo.box(Ps2Button.CROSS).cx(),
-                (int) geo.box(Ps2Button.CROSS).cy());
-        int crossDown = pressed.getPixel((int) geo.box(Ps2Button.CROSS).cx(),
-                (int) geo.box(Ps2Button.CROSS).cy());
-        assertTrue("the pressed key must change colour", cross != crossDown);
+        // compare whole keys, not a single pixel: the glyph in the middle keeps its colour
+        assertTrue("the pressed key must change", brightness(pressed, geo.box(Ps2Button.CROSS))
+                != brightness(idle, geo.box(Ps2Button.CROSS)));
+        assertEquals("only the pressed key may change",
+                brightness(idle, geo.box(Ps2Button.TRIANGLE)),
+                brightness(pressed, geo.box(Ps2Button.TRIANGLE)));
+        save(PadBitmap.renderPreview(EnumSet.of(Ps2Button.CROSS, Ps2Button.DPAD_LEFT),
+                        new float[]{0.65f, -0.45f}, new float[]{-0.3f, 0.4f}),
+                "build/pad-pressed.png");
+    }
 
-        int triangle = idle.getPixel((int) geo.box(Ps2Button.TRIANGLE).cx(),
-                (int) geo.box(Ps2Button.TRIANGLE).cy());
-        int triangleStill = pressed.getPixel((int) geo.box(Ps2Button.TRIANGLE).cx(),
-                (int) geo.box(Ps2Button.TRIANGLE).cy());
-        assertEquals("only the pressed key may change", triangle, triangleStill);
-
-        save(pressed, "build/pad-pressed.png");
+    /** Sum of the alpha-weighted brightness of a key box. */
+    private static long brightness(Bitmap bmp, com.downhill.mobile.pad.PadBox box) {
+        long sum = 0;
+        for (int y = (int) box.y; y < (int) box.bottom(); y += 2) {
+            for (int x = (int) box.x; x < (int) box.right(); x += 2) {
+                int c = bmp.getPixel(x, y);
+                sum += ((c >>> 16) & 0xFF) + ((c >>> 8) & 0xFF) + (c & 0xFF) + (c >>> 24);
+            }
+        }
+        return sum;
     }
 
     private static void save(Bitmap bmp, String path) {

@@ -23,9 +23,7 @@ import com.downhill.mobile.emu.EmulatorTarget;
 import com.downhill.mobile.emu.TuningProfile;
 import com.downhill.mobile.export.OverlayExporter;
 import com.downhill.mobile.legend.LegendActivity;
-import com.downhill.mobile.rom.FileBlockReader;
 import com.downhill.mobile.rom.IsoInfo;
-import com.downhill.mobile.rom.IsoParser;
 import com.downhill.mobile.rom.RomStore;
 import com.downhill.mobile.rom.ZipRomImporter;
 import com.downhill.mobile.ui.Ui;
@@ -43,6 +41,10 @@ import java.util.Set;
 public class MainActivity extends Activity {
 
     private static final int REQ_PICK_ROM = 1001;
+    private static final int REQ_PICK_PARTS = 1002;
+    /** Release page that hosts the APK and the two CSO parts. */
+    private static final String RELEASE_URL =
+            "https://github.com/davimikeben/Downhill-Domination-PS2/releases/latest";
 
     private RomStore store;
     private ZipRomImporter importer;
@@ -138,6 +140,16 @@ public class MainActivity extends Activity {
         pick.setOnClickListener(v -> pickRom());
         row.addView(pick);
         card.addView(row);
+
+        TextView download = Ui.secondaryButton(this, "⬇  Baixar o jogo do GitHub (2 partes)");
+        Ui.marginTop(download, this, 10);
+        download.setOnClickListener(v -> openRelease());
+        card.addView(download);
+
+        TextView join = Ui.secondaryButton(this, "🧩  Juntar as 2 partes baixadas");
+        Ui.marginTop(join, this, 8);
+        join.setOnClickListener(v -> pickParts());
+        card.addView(join);
 
         TextView clear = Ui.label(this, "apagar a imagem importada", 12.5f, Ui.TEXT_DIM, false);
         clear.setPadding(0, Ui.dp(this, 12), 0, 0);
@@ -252,7 +264,9 @@ public class MainActivity extends Activity {
         if (romStatus != null) {
             if (ready) {
                 String serial = store.serial();
-                romStatus.setText("✅ Imagem pronta: " + gb(store.size()) + " GB"
+                romStatus.setText("✅ Jogo pronto: " + store.gameFile().getName() + " · "
+                        + gb(store.size()) + " GB"
+                        + (store.isCompressed() ? " (comprimido, sem perda)" : " (ISO cru)")
                         + (TextUtils.isEmpty(serial) ? ""
                         : "\n🔑 Serial PS2: " + serial + "  (" + IsoInfo.regionOf(serial) + ")"));
             } else {
@@ -284,20 +298,11 @@ public class MainActivity extends Activity {
             return;
         }
         new Thread(() -> {
-            IsoInfo parsed = null;
-            try (FileBlockReader r = new FileBlockReader(store.isoFile())) {
-                parsed = IsoParser.parse(r);
-            } catch (IOException ignored) {
-                parsed = null;
-            }
-            final IsoInfo info = parsed;
+            final IsoInfo info = store.sniffInfo();
             if (info == null) {
                 return;
             }
-            runOnUiThread(() -> {
-                store.rememberInfo(info);
-                refresh();
-            });
+            runOnUiThread(this::refresh);
         }).start();
     }
 
@@ -322,24 +327,48 @@ public class MainActivity extends Activity {
         }
     }
 
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode != REQ_PICK_ROM || resultCode != RESULT_OK || data == null) {
-            return;
+    private void openRelease() {
+        try {
+            startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(RELEASE_URL)));
+        } catch (android.content.ActivityNotFoundException e) {
+            Toast.makeText(this, RELEASE_URL, Toast.LENGTH_LONG).show();
         }
-        Uri uri = data.getData();
-        if (uri == null) {
-            return;
-        }
-        startImport(uri);
     }
 
-    private void startImport(Uri uri) {
-        showProgress("Preparando a importação...");
+    private void pickParts() {
+        Intent i = new Intent(Intent.ACTION_OPEN_DOCUMENT);
+        i.addCategory(Intent.CATEGORY_OPENABLE);
+        i.setType("*/*");
+        i.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
+        try {
+            startActivityForResult(i, REQ_PICK_PARTS);
+        } catch (android.content.ActivityNotFoundException e) {
+            Toast.makeText(this, "Nenhum gerenciador de arquivos encontrado.",
+                    Toast.LENGTH_LONG).show();
+        }
+    }
+
+    private void startJoin(Intent data) {
+        final java.util.List<Uri> parts = new java.util.ArrayList<>();
+        ClipData clip = data.getClipData();
+        if (clip != null) {
+            for (int i = 0; i < clip.getItemCount(); i++) {
+                parts.add(clip.getItemAt(i).getUri());
+            }
+        } else if (data.getData() != null) {
+            parts.add(data.getData());
+        }
+        if (parts.isEmpty()) {
+            return;
+        }
+        showProgress("Juntando as partes do jogo...");
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         importer = new ZipRomImporter(this, store);
-        importer.start(uri, new ZipRomImporter.Callback() {
+        importer.startJoin(parts, importCallback());
+    }
+
+    private ZipRomImporter.Callback importCallback() {
+        return new ZipRomImporter.Callback() {
             @Override
             public void onProgress(long done, long total, String stage) {
                 if (progressBar == null) {
@@ -363,16 +392,41 @@ public class MainActivity extends Activity {
                 if (error != null) {
                     Toast.makeText(MainActivity.this, error, Toast.LENGTH_LONG).show();
                 } else {
-                    String msg = info == null
-                            ? "Imagem importada, mas o serial PS2 não foi lido."
-                            : (info.downhillDomination
-                            ? "Pronto: Downhill Domination " + info.serial + " (" + info.region + ")"
-                            : "Imagem importada: " + info.serial + " - confira se é o jogo certo.");
-                    Toast.makeText(MainActivity.this, msg, Toast.LENGTH_LONG).show();
+                    Toast.makeText(MainActivity.this, info != null && info.downhillDomination
+                                    ? "Jogo completo: " + info.serial + " (" + info.region + ")"
+                                    : "Arquivos juntados. Confira se é o jogo certo.",
+                            Toast.LENGTH_LONG).show();
                 }
                 refresh();
             }
-        });
+        };
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (resultCode != RESULT_OK || data == null) {
+            return;
+        }
+        if (requestCode == REQ_PICK_PARTS) {
+            startJoin(data);
+            return;
+        }
+        if (requestCode != REQ_PICK_ROM) {
+            return;
+        }
+        Uri uri = data.getData();
+        if (uri == null) {
+            return;
+        }
+        startImport(uri);
+    }
+
+    private void startImport(Uri uri) {
+        showProgress("Preparando a importação...");
+        getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+        importer = new ZipRomImporter(this, store);
+        importer.start(uri, importCallback());
     }
 
     private void confirmClear() {
@@ -403,7 +457,7 @@ public class MainActivity extends Activity {
             showEmulatorDialog();
             return;
         }
-        Intent intent = EmulatorLauncher.build(this, target, store.isoFile());
+        Intent intent = EmulatorLauncher.build(this, target, store.gameFile());
         if (intent == null) {
             Toast.makeText(this, "O " + target.label + " não aceitou a imagem.", Toast.LENGTH_LONG)
                     .show();
@@ -444,7 +498,7 @@ public class MainActivity extends Activity {
             b.setOnClickListener(v -> {
                 dialog.dismiss();
                 if (has) {
-                    Intent i = EmulatorLauncher.build(this, t, store.isoFile());
+                    Intent i = EmulatorLauncher.build(this, t, store.gameFile());
                     if (i != null) {
                         try {
                             startActivity(i);

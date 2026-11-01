@@ -35,12 +35,14 @@ public final class RomExtractor {
     private RomExtractor() {
     }
 
+    /** A raw disc image we copy as-is (uncompressed ISO, or an already compressed CSO). */
     public static boolean looksLikeIso(String displayName) {
         if (displayName == null) {
             return false;
         }
         String n = displayName.toLowerCase(Locale.ROOT);
-        return n.endsWith(".iso") || n.endsWith(".img") || n.endsWith(".bin");
+        return n.endsWith(".iso") || n.endsWith(".img") || n.endsWith(".bin")
+                || n.endsWith(".cso");
     }
 
     /**
@@ -56,7 +58,8 @@ public final class RomExtractor {
         ZipEntry entry;
         while ((entry = zip.getNextEntry()) != null) {
             String name = entry.getName().toLowerCase(Locale.ROOT);
-            if (name.endsWith(".iso") || name.endsWith(".bin") || name.endsWith(".img")) {
+            if (name.endsWith(".iso") || name.endsWith(".bin") || name.endsWith(".img")
+                    || name.endsWith(".cso")) {
                 return pump(zip, target, entry.getSize(), "Extraindo a imagem PS2...", progress,
                         cancel);
             }

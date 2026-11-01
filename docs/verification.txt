@@ -1,32 +1,37 @@
-Verificação executada neste repositório
-=======================================
+Verificação executada neste repositório (2.0.0)
+===============================================
 
-1) Caminho de importação do app rodando contra o arquivo real do usuário
-   (Downhill Domination (Europe) (En,Fr,De,Es,It).zip, 2.421.295.952 bytes)
-
-   zip      : 2421295952 bytes
-   iso      : 2771025920 bytes (extraído em 10,6 s, buffer de 1 MB)
-   crc      : validado pelo ZipInputStream (nenhum ZipException)
+1) Disco original do usuário (TransferNow)
+   zip      : 2.421.295.952 bytes -> iso 2.771.025.920 bytes (extração em 10,4 s, CRC ok)
    label    : DOWNHILLDOMINATION
    boot2    : cdrom0:\SLES_522.02;1
    serial   : SLES-52202 (PAL)
-   downhill : true
-   => resultado: OK
 
-2) Testes automatizados (gradle :app:testDebugUnitTest) -> 45 testes, 0 falhas
-   - pad/PadGeometryTest            geometria em 8 tamanhos de tela, hit-test, sem sobreposição
-   - pad/Ps2ButtonTest              21 teclas, emoji + dica, códigos de gamepad únicos
-   - rom/IsoParserTest              ISO 9660 sintético (PAL/NTSC-U), lixo, rótulo de volume
-   - rom/RomExtractorTest           zip->iso, iso cru, zip sem imagem, download truncado, cancelamento
-   - export/RetroArchOverlayTest    .cfg bem formado, coordenadas 0..1, mapa DualShock->RetroPad
-   - emu/*                          detecção de núcleos e tabela de otimização Mali-G52
-   - AppSmokeTest (Robolectric)     MainActivity, PadLab e Legend abertos; import zip->iso->serial;
-                                    export dos 3 arquivos; provider somente leitura
-   - PadRenderTest (Skia nativo)    pad rasterizado 1920x1080, pixels conferidos, tecla pressionada muda
+2) Conversão para CSO (tools/ciso.py)
+   iso      : 2.771.025.920 bytes
+   cso      : 2.500.420.488 bytes  (-9,8%)
+   header   : CISO, block=2048, v1, align=2 (offset >> 2, obrigatório acima de 2 GB)
+   observação: 93-96% dos setores não comprimem (áudio/vídeo já comprimidos) -> não existe
+   versão "em MB" deste jogo; o CSO é o menor formato que os núcleos de PS2 aceitam.
 
-3) APK publicado
-   v1.0.1 / DownhillDominationMobile-1.0.1.apk
-   sha256 3c51a73864fc0158e9824584d3e6961857c5f88493182c7d4eef9bd1d3f46477
-   apksigner: Verified using v2 scheme (APK Signature Scheme v2): true
-   aapt2: package com.downhill.mobile versionCode=2 versionName=1.0.1 minSdk=24 targetSdk=34
-          launchable-activity com.downhill.mobile.MainActivity
+3) Leitor CSO do app (codigo de producao) contra o CSO real
+   header   : CISO{total=2771025920 block=2048 v=1 align=2}
+   serial   : SLES-52202 (PAL) downhill=true
+   setores  : 0, 1.000.000 e 1.353.000 idênticos byte a byte ao ISO
+   => o leitor descomprime só o necessário e acha o SYSTEM.CNF
+
+4) Junção das 2 partes publicadas (codigo de producao, PartJoiner)
+   parte1   : 1.250.210.244 bytes
+   parte2   : 1.250.210.244 bytes
+   juntado  : 2.500.420.488 bytes
+   sha256   : 04f45b3c3ffc4c03c8a05adba78010c12a75090bd5a1370a38a3101bddc3326e
+              (idêntico ao CSO original)
+
+5) Testes automatizados: 54, 0 falhas
+   pad/PadGeometryTest, pad/Ps2ButtonTest, rom/IsoParserTest, rom/RomExtractorTest,
+   rom/CsoFileTest (inclui align=2), rom/PartJoinerTest, export/RetroArchOverlayTest,
+   emu/EmulatorTargetTest, emu/TuningProfileTest, AppSmokeTest (Robolectric),
+   PadRenderTest (Skia nativo: pad rasterizado, pixels e estado pressionado conferidos)
+
+6) APK
+   DownhillDominationMobile-2.0.0.apk, assinado (v2), minSdk 24, targetSdk 34

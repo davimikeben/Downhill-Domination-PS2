@@ -202,60 +202,65 @@ public final class PadGeometry {
     /** Pseudo key used only as an offset-table key for the two analog sticks. */
     public static final Ps2Button STICK_RIGHT_KEY = Ps2Button.R3;
 
-    private static final float[] LEFT_STICK_LAND = {204f, 72f, 58f, 32f};
-    private static final float[] RIGHT_STICK_LAND = {666f, 72f, 58f, 32f};
-    private static final float[] LEFT_STICK_PORT = {105f, 450f, 48f, 28f};
-    private static final float[] RIGHT_STICK_PORT = {315f, 450f, 48f, 28f};
+    private static final float[] LEFT_STICK_LAND = {300f, 290f, 62f, 32f};
+    private static final float[] RIGHT_STICK_LAND = {580f, 290f, 62f, 32f};
+    private static final float[] LEFT_STICK_PORT = {108f, 420f, 50f, 26f};
+    private static final float[] RIGHT_STICK_PORT = {312f, 420f, 50f, 26f};
 
     private static float[] reference(Ps2Button b, boolean land) {
         if (land) {
             switch (b) {
-                case L1: return new float[]{16f, 16f, 120f, 46f};
-                case L2: return new float[]{16f, 68f, 120f, 42f};
-                case R1: return new float[]{734f, 16f, 120f, 46f};
-                case R2: return new float[]{734f, 68f, 120f, 42f};
-                case SELECT: return new float[]{343f, 16f, 92f, 46f};
-                case START: return new float[]{435f, 16f, 92f, 46f};
-                case L3: return new float[]{16f, 330f, 74f, 44f};
-                case R3: return new float[]{780f, 330f, 74f, 44f};
-                case DPAD_UP: return new float[]{119f, 130f, 62f, 62f};
-                case DPAD_DOWN: return new float[]{119f, 262f, 62f, 62f};
-                case DPAD_LEFT: return new float[]{53f, 196f, 62f, 62f};
-                case DPAD_RIGHT: return new float[]{185f, 196f, 62f, 62f};
-                case TRIANGLE: return new float[]{688f, 131f, 64f, 64f};
-                case CIRCLE: return new float[]{752f, 195f, 64f, 64f};
-                case CROSS: return new float[]{688f, 259f, 64f, 64f};
-                case SQUARE: return new float[]{624f, 195f, 64f, 64f};
-                case TURBO: return new float[]{234f, 330f, 74f, 44f};
-                case SAVE: return new float[]{316f, 330f, 74f, 44f};
-                case LOAD: return new float[]{398f, 330f, 74f, 44f};
-                case FF: return new float[]{480f, 330f, 74f, 44f};
-                case MENU: return new float[]{562f, 330f, 74f, 44f};
+                // shoulders: top corners, like the real controller
+                case L1: return new float[]{16f, 10f, 132f, 42f};
+                case L2: return new float[]{16f, 58f, 132f, 38f};
+                case R1: return new float[]{722f, 10f, 132f, 42f};
+                case R2: return new float[]{722f, 58f, 132f, 38f};
+                case SELECT: return new float[]{368f, 10f, 64f, 42f};
+                case START: return new float[]{440f, 10f, 64f, 42f};
+                // extra keys: one tidy row in the middle, clear of both thumbs
+                case TURBO: return new float[]{274f, 60f, 58f, 34f};
+                case SAVE: return new float[]{340f, 60f, 58f, 34f};
+                case LOAD: return new float[]{406f, 60f, 58f, 34f};
+                case FF: return new float[]{472f, 60f, 58f, 34f};
+                case MENU: return new float[]{538f, 60f, 58f, 34f};
+                // d-pad cross, bottom left under the thumb
+                case DPAD_UP: return new float[]{111f, 163f, 58f, 58f};
+                case DPAD_DOWN: return new float[]{111f, 279f, 58f, 58f};
+                case DPAD_LEFT: return new float[]{53f, 221f, 58f, 58f};
+                case DPAD_RIGHT: return new float[]{169f, 221f, 58f, 58f};
+                // stick clicks sit right under their stick
+                case L3: return new float[]{264f, 356f, 72f, 26f};
+                case R3: return new float[]{544f, 356f, 72f, 26f};
+                // face buttons: PS2 diamond, bottom right
+                case TRIANGLE: return new float[]{712f, 146f, 68f, 68f};
+                case CIRCLE: return new float[]{780f, 214f, 68f, 68f};
+                case CROSS: return new float[]{712f, 282f, 68f, 68f};
+                case SQUARE: return new float[]{644f, 214f, 68f, 68f};
                 default: return null;
             }
         }
         switch (b) {
-            case L1: return new float[]{10f, 10f, 96f, 40f};
-            case L2: return new float[]{10f, 54f, 96f, 38f};
-            case R1: return new float[]{314f, 10f, 96f, 40f};
-            case R2: return new float[]{314f, 54f, 96f, 38f};
-            case TURBO: return new float[]{14f, 110f, 74f, 40f};
-            case SAVE: return new float[]{96f, 110f, 74f, 40f};
-            case LOAD: return new float[]{178f, 110f, 74f, 40f};
-            case FF: return new float[]{260f, 110f, 74f, 40f};
-            case MENU: return new float[]{342f, 110f, 64f, 40f};
-            case L3: return new float[]{14f, 160f, 88f, 40f};
-            case SELECT: return new float[]{110f, 160f, 90f, 40f};
-            case START: return new float[]{208f, 160f, 90f, 40f};
-            case R3: return new float[]{306f, 160f, 88f, 40f};
-            case DPAD_UP: return new float[]{77f, 212f, 56f, 56f};
-            case DPAD_DOWN: return new float[]{77f, 332f, 56f, 56f};
-            case DPAD_LEFT: return new float[]{17f, 272f, 56f, 56f};
-            case DPAD_RIGHT: return new float[]{109f, 272f, 56f, 56f};
-            case TRIANGLE: return new float[]{286f, 213f, 58f, 58f};
-            case CIRCLE: return new float[]{344f, 271f, 58f, 58f};
-            case CROSS: return new float[]{286f, 329f, 58f, 58f};
-            case SQUARE: return new float[]{228f, 271f, 58f, 58f};
+            case L1: return new float[]{10f, 10f, 100f, 38f};
+            case L2: return new float[]{10f, 52f, 100f, 36f};
+            case R1: return new float[]{310f, 10f, 100f, 38f};
+            case R2: return new float[]{310f, 52f, 100f, 36f};
+            case SELECT: return new float[]{126f, 10f, 72f, 38f};
+            case START: return new float[]{206f, 10f, 72f, 38f};
+            case TURBO: return new float[]{16f, 100f, 72f, 34f};
+            case SAVE: return new float[]{96f, 100f, 72f, 34f};
+            case LOAD: return new float[]{176f, 100f, 72f, 34f};
+            case FF: return new float[]{256f, 100f, 72f, 34f};
+            case MENU: return new float[]{336f, 100f, 72f, 34f};
+            case DPAD_UP: return new float[]{76f, 190f, 54f, 54f};
+            case DPAD_DOWN: return new float[]{76f, 306f, 54f, 54f};
+            case DPAD_LEFT: return new float[]{20f, 248f, 54f, 54f};
+            case DPAD_RIGHT: return new float[]{132f, 248f, 54f, 54f};
+            case L3: return new float[]{72f, 474f, 84f, 26f};
+            case R3: return new float[]{264f, 474f, 84f, 26f};
+            case TRIANGLE: return new float[]{264f, 186f, 50f, 50f};
+            case CIRCLE: return new float[]{314f, 236f, 50f, 50f};
+            case CROSS: return new float[]{264f, 286f, 50f, 50f};
+            case SQUARE: return new float[]{214f, 236f, 50f, 50f};
             default: return null;
         }
     }

@@ -6,6 +6,7 @@ import android.os.Build;
 import android.os.StatFs;
 
 import java.io.File;
+import java.io.IOException;
 
 /**
  * Where the disc image lives and whether it is usable.
@@ -17,6 +18,7 @@ import java.io.File;
 public final class RomStore {
 
     public static final String ISO_NAME = "downhill.iso";
+    public static final String CSO_NAME = "downhill.cso";
     public static final long EXPECTED_ISO_BYTES = 2771025920L;
 
     private static final String PREF_SERIAL = "rom_serial";
@@ -41,18 +43,47 @@ public final class RomStore {
         return new File(dir(), ISO_NAME);
     }
 
+    public File csoFile() {
+        return new File(dir(), CSO_NAME);
+    }
+
     public File partFile() {
         return new File(dir(), ISO_NAME + ".part");
     }
 
-    /** True when a complete image is on disk. */
+    /** Temporary file used while the release parts are joined. */
+    public File joinPartFile() {
+        return new File(dir(), CSO_NAME + ".part");
+    }
+
+    /**
+     * The disc image the emulator will open: the CSO when present (smaller on
+     * disk), otherwise the plain ISO.
+     */
+    public File gameFile() {
+        File cso = csoFile();
+        if (cso.isFile() && cso.length() > 256L * 1024 * 1024) {
+            return cso;
+        }
+        return isoFile();
+    }
+
+    /** True when a complete image is on disk, compressed or not. */
     public boolean isReady() {
-        File f = isoFile();
-        return f.isFile() && f.length() > 512L * 1024 * 1024;
+        File cso = csoFile();
+        if (cso.isFile() && cso.length() > 256L * 1024 * 1024) {
+            return true;
+        }
+        File iso = isoFile();
+        return iso.isFile() && iso.length() > 512L * 1024 * 1024;
+    }
+
+    public boolean isCompressed() {
+        return gameFile().getName().endsWith(".cso");
     }
 
     public long size() {
-        File f = isoFile();
+        File f = gameFile();
         return f.isFile() ? f.length() : 0L;
     }
 
@@ -103,6 +134,30 @@ public final class RomStore {
                 .getString(PREF_LABEL, "");
     }
 
+    /** Sniffs the serial of whatever image is on disk (CSO blocks or raw ISO sectors). */
+    public IsoInfo sniffInfo() {
+        File game = gameFile();
+        if (!game.isFile()) {
+            return null;
+        }
+        try {
+            if (game.getName().endsWith(".cso")) {
+                try (CsoFile.Reader reader = CsoFile.blockReader(game)) {
+                    IsoInfo info = IsoParser.parse(reader);
+                    rememberInfo(info);
+                    return info;
+                }
+            }
+            try (FileBlockReader reader = new FileBlockReader(game)) {
+                IsoInfo info = IsoParser.parse(reader);
+                rememberInfo(info);
+                return info;
+            }
+        } catch (IOException | RuntimeException e) {
+            return null;
+        }
+    }
+
     /** Reads the serial from the image that is already on disk. */
     public IsoInfo readInfo(IsoParser.BlockReader reader) {
         if (!isReady()) {
@@ -117,15 +172,12 @@ public final class RomStore {
         }
     }
 
-    /** Deletes the image and the stale metadata. */
+    /** Deletes every image and the stale metadata. */
     public void clear() {
-        File iso = isoFile();
-        if (iso.exists()) {
-            iso.delete();
-        }
-        File part = partFile();
-        if (part.exists()) {
-            part.delete();
+        for (File f : new File[]{isoFile(), csoFile(), partFile(), joinPartFile()}) {
+            if (f.exists()) {
+                f.delete();
+            }
         }
         rememberInfo(null);
     }

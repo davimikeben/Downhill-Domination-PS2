@@ -1,141 +1,129 @@
-# Downhill Domination — Mobile (Android)
+# Downhill Domination — Mobile (Android) 2.0.0
 
-Porta o **Downhill Domination (PS2)** para celular com teclado virtual completo, bonito e
-com **emoji em cada tecla**, e traz ajustes prontos para rodar em **GPU fraca (Mali-G52)**.
+Jogo de PS2 no celular, com o **jogo completo publicado aqui no GitHub**, teclado virtual
+completo e ajustes para GPU fraca (Mali-G52).
 
 ![Pad do jogo](docs/pad-preview.png)
 
-> **O que este app é, sem enrolação:** um jogo de PS2 não tem "port nativo" real — o que
-> existe no Android são **núcleos de emulação de PS2** (ARMSX2 / AetherSX2 / NetherSX2 /
-> RetroArch + LRPS2). Este APK é a camada que faltava em volta deles: importa a sua imagem,
-> abre o jogo num toque, desenha o pad completo com emoji, exporta esse pad e aplica os
-> ajustes de desempenho. É assim que os ports de PS2 para Android funcionam por dentro.
+## Baixar
 
----
+| Arquivo | Tamanho | Para que serve |
+|---|---|---|
+| [DownhillDominationMobile-2.0.0.apk](https://github.com/davimikeben/Downhill-Domination-PS2/releases/latest) | 46 KB | o app (Android 7+) |
+| `DownhillDomination.cso.000` | 1,25 GB | 1ª metade do jogo |
+| `DownhillDomination.cso.001` | 1,25 GB | 2ª metade do jogo |
 
-## 1. Baixar o APK
+O jogo é um CSO (imagem comprimida de PS2) de **2.500.420.488 bytes**. O GitHub aceita no
+máximo 2 GB por arquivo, então ele é publicado em **duas partes**; o app junta as duas em um
+clique (menu *Juntar as 2 partes baixadas*) e confere o resultado.
 
-**[⬇ DownhillDominationMobile-1.0.1.apk](https://github.com/davimikeben/Downhill-Domination-PS2/releases/download/v1.0.1/DownhillDominationMobile-1.0.1.apk)**
+> Por que não vai dentro do APK, e por que não fica "em MB": o disco tem 2,77 GB de dados
+> **já comprimidos** (áudio e vídeo do jogo). Medi bloco a bloco: 93–96% dos setores não
+> comprimem, e o CSO só ganha 10% (2,77 → 2,50 GB). Um APK com o jogo dentro passaria de
+> 2,5 GB, acima do limite de 2 GB por arquivo de release do GitHub e do que o Android
+> instala de forma confiável. Por isso: APK leve + jogo em 2 partes + junção automática.
 
-Instale no celular (Android 7.0+ / `minSdk 24`). O APK é **assinado** (esquema v2) e não
-pede root. `sha256 3c51a73864fc0158e9824584d3e6961857c5f88493182c7d4eef9bd1d3f46477`.
+## Como jogar (3 passos)
 
-## 2. O jogo
+1. Instale o **APK** e um núcleo de PS2 no celular — o app detecta e leva na loja:
+   **ARMSX2** (mais rápido em ARM), **AetherSX2**, **NetherSX2** ou **RetroArch + LRPS2**.
+2. Baixe as **2 partes** do jogo (botão *Baixar o jogo do GitHub* já abre esta página) e
+   toque em **Juntar as 2 partes baixadas** — pode marcar as duas em qualquer ordem.
+   O app grava `downhill.cso` (2,5 GB), valida o cabeçalho CISO e mostra o serial
+   **SLES-52202 (PAL)**, provando que o jogo está íntegro.
+3. Toque em **▶ JOGAR**: a imagem vai para o núcleo por `content://`, sem copiar de novo.
 
-O arquivo que você mandou no TransferNow é:
+Também funciona com a sua imagem original: **Importar ROM (.zip / .iso / .cso)** —
+o zip de 2,42 GB é descompactado em streaming (com CRC e checagem de espaço).
 
-| Arquivo | Tamanho |
-|---|---|
-| `Downhill Domination (Europe) (En,Fr,De,Es,It).zip` | 2,42 GB (deflate) |
-| `Downhill Domination (Europe) (En,Fr,De,Es,It).iso` | 2,77 GB (dentro do zip) |
+## O que mudou na 2.0.0
 
-Ele **não cabe dentro do APK** (o limite de um asset/release é 2 GB), então o app importa
-o zip uma única vez:
+**Pad redesenhado** (o PNG antigo era feio, e tinha um bug de verdade: um `Paint` herdava
+alpha 18 e todas as teclas saíam lavadas):
 
-1. Abra o app → **Importar ROM (.zip / .iso)** → escolha o zip baixado.
-2. O app descompacta em streaming para a memória privada (`downhill.iso`), com barra de
-   progresso, checagem de CRC do zip e checagem de espaço livre (precisa de ~2,8 GB).
-3. No fim ele lê a estrutura ISO 9660 e mostra o serial: **SLES-52202 (PAL)** — prova que a
-   imagem é o jogo certo, e não um zip corrompido.
+- analógicos agora ficam **embaixo**, onde o dedão descansa (antes estavam no topo);
+- **D-pad em cruz única**, com centro escavado e setas vetoriais (nada de emoji colado);
+- botões de ação com os símbolos reais do PlayStation desenhados em vetor;
+- ombros L1/L2/R1/R2 em pill, teclas extras só com ícone vetorial (raio, disquete, pasta,
+  avançar, ajustes) — antes os rótulos vazavam da tecla;
+- rótulos micro em caixa alta, rim de 1 dp e gradiente de vidro escuro;
+- os emoji continuam no app onde eles ajudam a identificar: **legenda** e **leitura do
+  Pad Lab** (mostra `🔺 Triângulo — Salto e manobras aéreas` ao apertar).
 
-Para baixar e conferir o pacote pelo terminal: `scripts/fetch-rom.sh`.
+**Jogo completo no GitHub**: CSO dividido em 2 partes + junção dentro do app + link direto
+para a release.
 
-### Verificado com o arquivo real
+**Suporte a CSO**: o app lê o cabeçalho CISO, acha o `SYSTEM.CNF` descomprimindo só os
+setores necessários e guarda a imagem comprimida (10% menos espaço no celular).
 
-O caminho de importação do app foi executado contra o arquivo do seu link:
+## Teclado virtual
 
-```
-zip      : 2.421.295.952 bytes
-iso      : 2.771.025.920 bytes (extraído em 10,6 s)
-crc      : verificado pelo ZipInputStream (nenhum ZipException)
-label    : DOWNHILLDOMINATION
-boot2    : cdrom0:\SLES_522.02;1
-serial   : SLES-52202 (PAL)
-downhill : true
-```
+21 teclas do DualShock 2 (direcional, △ ○ ✕ □, L1/L2/R1/R2, L3/R3, Select, Start) + 5 extras
+(⚡ Turbo, 💾 Salvar, 📂 Carregar, ⏩ Avançar, ⚙ Ajustes), dois analógicos com zona morta e
+ponteiro preso (o dedo não troca de tecla ao deslizar), vibração, escala e transparência.
 
-> Foi assim que o serial correto entrou no código: a primeira versão achava que era
-> `SLES-53828` e teria avisado "confira se é o jogo certo" para o arquivo certo. Hoje a
-> detecção usa o serial **e** o rótulo do volume (`DOWNHILL`).
+- **Legenda com emoji**: cada tecla com o emoji do pad e a função no jogo.
+- **Pad Lab**: tela cheia para testar, com contador de FPS real.
+- **Exportar pad**: gera `downhill-pad.cfg` + `downhill-pad.png` + `LEIA-ME.txt` para o
+  RetroArch (`Settings › On-Screen Display › On-Screen Overlay`). Exemplo pronto em
+  [`docs/downhill-pad.cfg`](docs/downhill-pad.cfg) (23 descritores: 21 teclas + 2 analógicos).
 
-## 3. Rodar
-
-1. Instale um núcleo PS2 no celular (o app detecta sozinho e leva na loja):
-   **ARMSX2** (mais rápido em ARM), **AetherSX2**, **NetherSX2** ou **RetroArch (LRPS2)**.
-2. No app, toque em **▶ JOGAR** — a imagem é entregue ao núcleo por `content://`
-   (sem copiar 2,7 GB de novo).
-
-## 4. Otimização para Mali-G52
-
-O app mostra a lista pronta (e copia para a área de transferência). O que mais importa:
+## Otimização para Mali-G52
 
 | Onde | Ajuste | Valor |
 |---|---|---|
 | Graphics | Renderer | OpenGL |
 | Graphics | Internal Resolution | **1x (nativo)** |
 | Graphics | Texture Filtering / FXAA / Shade Boost | Desligado |
-| Emulation | **MT-VU (Multi-Threaded VU1)** | Ligado |
+| Emulation | **MT-VU** | Ligado |
 | Emulation | EE Cycle Rate / Skip | 100% / 1 |
 | System | Sustained Performance Mode | Ligado |
 
-Fora do emulador, o próprio app já ajuda: superfície opaca, sem inflar layout na hora de
-desenhar o pad (um único `Canvas`), haptics curtos e nenhuma thread de animação girando à
-toa — o contador de quadros do *Pad Lab* existe para você conferir isso na sua tela.
+O app mostra a lista completa e copia para a área de transferência. O pad é desenhado em um
+único `Canvas` (sem inflar layout por frame) e o Pad Lab não roda loop de animação quando a
+tela está em segundo plano.
 
-## 5. Teclado virtual
-
-- **21 teclas**: direcional (4), ação (△ ○ ✕ □), ombros (L1/L2/R1/R2), L3/R3, Select,
-  Start + 5 extras do app (⚡ Turbo, 💾 Salvar, 📂 Carregar, ⏩ Avançar, ⚙ Menu).
-- **2 analógicos** com zona morta, ponteiro preso (o dedo não "pula" de tecla), vibração e
-  escala/transparência ajustáveis.
-- **Legenda com emoji**: cada tecla com o mesmo emoji que aparece no pad e a função dela no
-  jogo (pedalar, frear, pular, socar/atacar, manobras...).
-- **Exportar pad**: gera `downhill-pad.cfg` + `downhill-pad.png` + `LEIA-ME.txt` e manda
-  pelo compartilhamento — o mesmo pad, agora dentro do RetroArch
-  (`Settings › On-Screen Display › On-Screen Overlay › Overlay Preset`).
-  Um exemplo já gerado por esse código está em [`docs/downhill-pad.cfg`](docs/downhill-pad.cfg)
-  (23 descritores: 21 teclas + os dois analógicos).
-
-Mapa usado no RetroArch: `✕→btn_b`, `○→btn_a`, `□→btn_y`, `△→btn_x`, `L1/R1→btn_l/btn_r`,
-`L2/R2→btn_l2/btn_r2`, `L3/R3→btn_l3/btn_r3`, `Select/Start→btn_select/btn_start`,
-analógicos → `analog_left`/`analog_right`, extras → hotkeys do RetroArch.
-
-## 6. Compilar
+## Ferramentas
 
 ```bash
-scripts/setup-toolchain.sh          # JDK 17 + Android SDK 34 + Gradle 8.7 em .tooling/
-export JAVA_HOME="$PWD/.tooling/jdk-17.0.21+9"
-.tooling/gradle-8.7/bin/gradle :app:testDebugUnitTest   # 44 testes
-.tooling/gradle-8.7/bin/gradle :app:assembleRelease     # APK assinado
+scripts/setup-toolchain.sh                       # JDK 17 + SDK 34 + Gradle 8.7
+python3 tools/ciso.py encode jogo.iso jogo.cso   # ISO -> CSO (alinhamento p/ >2 GB)
+python3 tools/ciso.py test jogo.cso              # confere o cabeçalho CISO
+scripts/fetch-rom.sh                             # baixa o arquivo original do TransferNow
+split -n 2 -d -a 3 jogo.cso DownhillDomination.cso.   # as partes da release
 ```
 
-Chave de assinatura em `signing/downhill-release.jks` (senha `downhill2026`, alias
-`downhill`) — é a mesma que assina o APK publicado nas Releases.
-
-## 7. Estrutura
+## Estrutura
 
 ```
 app/src/main/java/com/downhill/mobile/
-├── MainActivity.java          # importar, jogar, exportar, ver ajustes
-├── PadLabActivity.java        # tela cheia de teste do pad + FPS real
-├── legend/LegendActivity.java # legenda com emoji de todas as teclas
-├── pad/                       # modelo das teclas, geometria, desenho e toque
-├── rom/                       # leitor ISO 9660, importador do zip, content provider
-├── emu/                       # detecção dos núcleos + tabela de otimização
-└── export/                    # overlay do RetroArch (.cfg) + PNG
+├── MainActivity.java            # importar, juntar partes, jogar, exportar, ajustes
+├── PadLabActivity.java          # teste do pad em tela cheia + FPS
+├── legend/LegendActivity.java   # legenda com emoji de cada tecla
+├── pad/                         # modelo das teclas, geometria, desenho, toque
+├── rom/                         # ISO 9660, CISO (CSO), importador, junção, provider
+├── emu/                         # detecção dos núcleos + tabela de otimização
+├── export/                      # overlay do RetroArch (.cfg) + PNG
+└── ui/                          # estilo dos cartões e botões
 ```
 
-## 8. Testes
+## Testes (54)
 
-O log da verificação completa está em [`docs/verification.txt`](docs/verification.txt).
-
-`gradle :app:testDebugUnitTest` roda 44 testes JVM:
+`gradle :app:testDebugUnitTest`:
 
 - geometria do pad em 8 telas (nenhuma tecla fora da tela, sem sobreposição, hit-test);
-- modelo das 21 teclas (emoji, código de gamepad, unicidade);
-- leitura do ISO 9660 com imagem sintética (serial EUA/Europa, lixo, outro jogo);
-- extração do zip (imagem dentro, iso cru, zip sem imagem, download truncado, cancelamento);
-- overlay do RetroArch (formato, faixas 0..1, mapa DualShock→RetroPad, README);
-- tabela de otimização e escolha do emulador;
-- **Robolectric**: abre as três telas de verdade, desenha o pad (Skia nativo) e confere os
-  pixels, gera os arquivos do export e faz um import completo zip→iso→serial.
+- 21 teclas com emoji, dica e códigos de gamepad únicos;
+- ISO 9660 sintético (PAL/NTSC-U, lixo, rótulo de volume);
+- **CISO**: ida e volta de setores, blocos comprimidos e crus, `align=2` (>2 GB), lixo;
+- **junção das partes**: ordem `.000/.001/.010`, byte a byte, cancelamento;
+- extração de zip/iso (truncado, cancelado, sem imagem dentro);
+- overlay do RetroArch (formato, faixas 0..1, mapa DualShock→RetroPad);
+- tabela de otimização e escolha do núcleo;
+- **Robolectric**: abre as três telas, rasteriza o pad com Skia (pixels conferidos), gera os
+  arquivos do export, roda import zip→iso→serial.
+
+Evidência da verificação com os arquivos reais em [`docs/verification.txt`](docs/verification.txt).
+
+## Signature
+
+APK assinado com `signing/downhill-release.jks` (senha `downhill2026`, alias `downhill`).
