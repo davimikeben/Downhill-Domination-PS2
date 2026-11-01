@@ -57,10 +57,19 @@ android {
     }
 
     testOptions {
-        unitTests.all { it.testLogging { events 'passed', 'failed', 'skipped' } }
+        unitTests {
+            includeAndroidResources = true
+            all {
+                it.testLogging { events 'passed', 'failed', 'skipped' }
+                it.jvmArgs '--add-opens=java.base/java.lang=ALL-UNNAMED',
+                        '--add-opens=java.base/java.util=ALL-UNNAMED',
+                        '--add-opens=java.base/java.io=ALL-UNNAMED'
+            }
+        }
     }
 }
 
 dependencies {
     testImplementation 'junit:junit:4.13.2'
+    testImplementation 'org.robolectric:robolectric:4.12.2'
 }

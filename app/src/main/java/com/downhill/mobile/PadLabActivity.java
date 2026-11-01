@@ -7,7 +7,8 @@ import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.Shader;
 import android.os.Bundle;
-import android.view.Choreographer;
+import android.os.Handler;
+import android.os.Looper;
 import android.view.Gravity;
 import android.view.View;
 import android.view.WindowManager;
@@ -32,16 +33,26 @@ public class PadLabActivity extends Activity implements VirtualPadView.Listener 
     private VirtualPadView pad;
     private TextView hud;
     private TrackBackdrop backdrop;
-    private int frames;
-    private long windowStart;
     private int fps;
+    private final Handler ticker = new Handler(Looper.getMainLooper());
+    private final Runnable tick = new Runnable() {
+        @Override
+        public void run() {
+            if (backdrop != null) {
+                fps = (int) Math.round(backdrop.takeFps());
+                hud.setText(summary());
+                backdrop.invalidate();
+            }
+            ticker.postDelayed(this, 500L);
+        }
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setKeepScreenOn();
         setContentView(build());
-        loop();
+        ticker.post(tick);
     }
 
     private void setKeepScreenOn() {
@@ -51,9 +62,16 @@ public class PadLabActivity extends Activity implements VirtualPadView.Listener 
     @Override
     protected void onPause() {
         super.onPause();
+        ticker.removeCallbacks(tick);
         if (pad != null) {
             pad.releaseAll();
         }
+    }
+
+    @Override
+    protected void onDestroy() {
+        ticker.removeCallbacks(tick);
+        super.onDestroy();
     }
 
     private View build() {
@@ -162,32 +180,23 @@ public class PadLabActivity extends Activity implements VirtualPadView.Listener 
         return sb.toString();
     }
 
-    /** Counts real drawn frames so the pad's cost is visible. */
-    private void loop() {
-        windowStart = System.nanoTime();
-        frames = 0;
-        Choreographer.getInstance().postFrameCallback(new Choreographer.FrameCallback() {
-            @Override
-            public void doFrame(long frameTimeNanos) {
-                frames++;
-                long elapsed = frameTimeNanos - windowStart;
-                if (elapsed >= 500_000_000L) {
-                    fps = (int) (frames * 1_000_000_000L / elapsed);
-                    windowStart = frameTimeNanos;
-                    frames = 0;
-                    hud.setText(summary());
-                }
-                backdrop.invalidate();
-                Choreographer.getInstance().postFrameCallback(this);
-            }
-        });
-    }
-
     /** Cheap fake game frame: gradient sky, rolling hill and the track. */
     private final class TrackBackdrop extends View {
         private final Paint p = new Paint(Paint.ANTI_ALIAS_FLAG);
         private final Path path = new Path();
         private float phase;
+        private int frames;
+        private long windowStart = System.nanoTime();
+
+        /** Frames drawn since the last call, normalised to frames per second. */
+        float takeFps() {
+            long now = System.nanoTime();
+            long elapsed = now - windowStart;
+            float value = elapsed <= 0 ? 0f : frames * 1_000_000_000f / elapsed;
+            frames = 0;
+            windowStart = now;
+            return value;
+        }
 
         TrackBackdrop() {
             super(PadLabActivity.this);
@@ -195,6 +204,7 @@ public class PadLabActivity extends Activity implements VirtualPadView.Listener 
 
         @Override
         protected void onDraw(Canvas c) {
+            frames++;
             int w = getWidth();
             int h = getHeight();
             p.setShader(new LinearGradient(0f, 0f, 0f, h * 0.62f,

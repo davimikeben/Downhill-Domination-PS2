@@ -69,10 +69,16 @@ public final class RomStore {
         }
     }
 
-    /** Bytes still missing before the import can start, 0 when there is room. */
+    /**
+     * Bytes still missing before the import can start, 0 when there is room.
+     *
+     * <p>A reading of 0 (or a failure) means the filesystem does not report free
+     * space - some custom ROMs and virtual/storage providers do that - and in that
+     * case the import is allowed to try instead of being blocked by a guess.</p>
+     */
     public long missingSpace() {
         long free = freeBytes();
-        if (free < 0) {
+        if (free <= 0) {
             return 0L;
         }
         long need = EXPECTED_ISO_BYTES + 256L * 1024 * 1024;

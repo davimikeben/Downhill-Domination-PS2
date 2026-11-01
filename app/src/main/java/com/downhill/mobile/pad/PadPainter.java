@@ -4,6 +4,7 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.LinearGradient;
 import android.graphics.Paint;
+import android.graphics.Path;
 import android.graphics.RadialGradient;
 import android.graphics.RectF;
 import android.graphics.Shader;
@@ -28,6 +29,7 @@ public final class PadPainter {
     private final Paint text = new Paint(Paint.ANTI_ALIAS_FLAG);
     private final Paint glow = new Paint(Paint.ANTI_ALIAS_FLAG);
     private final RectF rect = new RectF();
+    private final Path path = new Path();
 
     private final Typeface labelFace = PadTheme.labelTypeface();
     private final Typeface iconFace = PadTheme.emojiTypeface();
@@ -100,10 +102,10 @@ public final class PadPainter {
         float r = Math.min(box.w, box.h) * 0.5f;
 
         if (down) {
-            glow.setShader(new RadialGradient(cx, cy, r * 1.55f,
-                    new int[]{0x88FF6B1A, 0x22FF6B1A, 0x00FF6B1A},
-                    new float[]{0f, 0.6f, 1f}, Shader.TileMode.CLAMP));
-            c.drawCircle(cx, cy, r * 1.55f, glow);
+            glow.setShader(new RadialGradient(cx, cy, r * 1.30f,
+                    new int[]{0x77FF6B1A, 0x1EFF6B1A, 0x00FF6B1A},
+                    new float[]{0f, 0.62f, 1f}, Shader.TileMode.CLAMP));
+            c.drawCircle(cx, cy, r * 1.30f, glow);
             glow.setShader(null);
         }
 
@@ -117,15 +119,22 @@ public final class PadPainter {
         stroke.setAlpha(down ? 255 : 230);
         c.drawCircle(cx, cy, r - g.dp(0.9f), stroke);
 
-        text.setTypeface(iconFace);
-        text.setColor(PadTheme.TEXT_PRIMARY);
-        text.setTextSize(r * (down ? 1.02f : 0.95f));
-        c.drawText(b.emoji, cx, cy + r * 0.34f, text);
+        drawFaceSymbol(c, g, b, cx, cy - r * 0.08f, r * 0.46f, down);
 
+        // The name has to fit inside the circle: measure it and shrink to the chord
+        // available at the baseline height instead of letting it spill over the rim.
         text.setTypeface(labelFace);
-        text.setColor(PadTheme.TEXT_SECONDARY);
-        text.setTextSize(Math.max(g.dp(6f), r * 0.26f));
-        c.drawText(b.shortLabel, cx, cy + r * 0.80f, text);
+        text.setColor(down ? PadTheme.TEXT_PRIMARY : PadTheme.TEXT_SECONDARY);
+        float wanted = Math.max(g.dp(5.5f), r * 0.26f);
+        float baseline = cy + r * 0.58f;
+        float chord = 2f * (float) Math.sqrt(Math.max(1f,
+                r * r - (baseline - cy) * (baseline - cy)));
+        text.setTextSize(wanted);
+        float width = text.measureText(b.shortLabel);
+        if (width > chord * 0.92f) {
+            text.setTextSize(wanted * (chord * 0.92f) / width);
+        }
+        c.drawText(b.shortLabel, cx, baseline, text);
     }
 
     /**
@@ -133,6 +142,10 @@ public final class PadPainter {
      * pad readable at a glance and the label removes the last doubt.
      */
     private void drawGlyphs(Canvas c, PadGeometry g, Ps2Button b, PadBox box, boolean down) {
+        if (b.group == Ps2Button.Group.DPAD) {
+            drawDpadArrow(c, g, b, box, down);
+            return;
+        }
         boolean roomForBoth = box.h > g.dp(34f) && box.w > g.dp(30f);
         float iconSize = roomForBoth ? Math.min(box.h * 0.42f, box.w * 0.38f)
                 : Math.min(box.h * 0.62f, box.w * 0.55f);
@@ -151,6 +164,110 @@ public final class PadPainter {
             text.setTextSize(Math.max(g.dp(6.4f), Math.min(box.h * 0.22f, box.w * 0.17f)));
             c.drawText(b.shortLabel, cx, cy + box.h * 0.30f, text);
         }
+    }
+
+    /** The four PlayStation shapes, drawn as vectors so they stay crisp at any size. */
+    private void drawFaceSymbol(Canvas c, PadGeometry g, Ps2Button b, float cx, float cy,
+                                float r, boolean down) {
+        int colour = PadTheme.faceColor(b);
+        fill.setColor(colour);
+        fill.setAlpha(down ? 255 : 235);
+        stroke.setColor(0x55000000);
+        stroke.setStrokeWidth(g.dp(0.9f));
+
+        switch (b) {
+            case TRIANGLE:
+                path.reset();
+                path.moveTo(cx, cy - r);
+                path.lineTo(cx + r * 0.92f, cy + r * 0.72f);
+                path.lineTo(cx - r * 0.92f, cy + r * 0.72f);
+                path.close();
+                c.drawPath(path, fill);
+                c.drawPath(path, stroke);
+                break;
+            case CIRCLE:
+                if (down) {
+                    c.drawCircle(cx, cy, r * 0.92f, fill);
+                } else {
+                    stroke.setColor(colour);
+                    stroke.setStrokeWidth(g.dp(4.2f));
+                    c.drawCircle(cx, cy, r * 0.72f, stroke);
+                }
+                break;
+            case SQUARE:
+                rect.set(cx - r * 0.78f, cy - r * 0.78f, cx + r * 0.78f, cy + r * 0.78f);
+                c.drawRoundRect(rect, g.dp(2.4f), g.dp(2.4f), fill);
+                c.drawRoundRect(rect, g.dp(2.4f), g.dp(2.4f), stroke);
+                rect.set(0f, 0f, 0f, 0f);
+                break;
+            default: {
+                float arm = r * 0.86f;
+                float t = r * 0.36f;
+                path.reset();
+                path.moveTo(cx - arm, cy - arm + t);
+                path.lineTo(cx - arm + t, cy - arm);
+                path.lineTo(cx, cy - t);
+                path.lineTo(cx + arm - t, cy - arm);
+                path.lineTo(cx + arm, cy - arm + t);
+                path.lineTo(cx + t, cy);
+                path.lineTo(cx + arm, cy + arm - t);
+                path.lineTo(cx + arm - t, cy + arm);
+                path.lineTo(cx, cy + t);
+                path.lineTo(cx - arm + t, cy + arm);
+                path.lineTo(cx - arm, cy + arm - t);
+                path.lineTo(cx - t, cy);
+                path.close();
+                c.drawPath(path, fill);
+                c.drawPath(path, stroke);
+                break;
+            }
+        }
+    }
+
+    /** Crisp vector chevron for the d-pad (an emoji arrow looks out of place here). */
+    private void drawDpadArrow(Canvas c, PadGeometry g, Ps2Button b, PadBox box, boolean down) {
+        float cx = box.cx();
+        float cy = box.cy() - box.h * 0.14f;
+        float size = Math.min(box.w, box.h) * 0.26f;
+        float half = size * 0.62f;
+        float thick = Math.max(g.dp(2.6f), size * 0.42f);
+
+        path.reset();
+        switch (b) {
+            case DPAD_UP:
+                path.moveTo(cx, cy - size);
+                path.lineTo(cx + half, cy + size * 0.55f);
+                path.lineTo(cx - half, cy + size * 0.55f);
+                break;
+            case DPAD_DOWN:
+                path.moveTo(cx, cy + size);
+                path.lineTo(cx + half, cy - size * 0.55f);
+                path.lineTo(cx - half, cy - size * 0.55f);
+                break;
+            case DPAD_LEFT:
+                path.moveTo(cx - size, cy);
+                path.lineTo(cx + size * 0.55f, cy - half);
+                path.lineTo(cx + size * 0.55f, cy + half);
+                break;
+            default:
+                path.moveTo(cx + size, cy);
+                path.lineTo(cx - size * 0.55f, cy - half);
+                path.lineTo(cx - size * 0.55f, cy + half);
+                break;
+        }
+        path.close();
+        fill.setColor(down ? PadTheme.KEY_STROKE_PRESSED : 0xFFBFEFE7);
+        fill.setAlpha(down ? 255 : 235);
+        c.drawPath(path, fill);
+
+        stroke.setColor(0x6625E0C4);
+        stroke.setStrokeWidth(Math.min(thick, g.dp(1.6f)));
+        c.drawPath(path, stroke);
+
+        text.setTypeface(labelFace);
+        text.setColor(down ? PadTheme.TEXT_PRIMARY : PadTheme.TEXT_SECONDARY);
+        text.setTextSize(Math.max(g.dp(5.6f), box.h * 0.17f));
+        c.drawText(b.shortLabel, cx, box.bottom() - box.h * 0.09f, text);
     }
 
     // -------------------------------------------------------------- sticks --
