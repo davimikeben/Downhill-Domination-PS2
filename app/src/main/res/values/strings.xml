@@ -2,7 +2,4 @@
 <resources>
     <string name="app_name">Downhill Domination Mobile</string>
     <string name="legend_title">Legenda das teclas</string>
-    <string name="overlay_channel">Teclado virtual</string>
-    <string name="overlay_running">Teclado virtual ativo</string>
-    <string name="overlay_stop">Desligar</string>
 </resources>

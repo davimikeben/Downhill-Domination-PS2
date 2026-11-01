@@ -6,3 +6,7 @@ local.properties
 captures/
 *.log
 .kotlin/
+
+# local toolchain (JDK + Android SDK + Gradle) - recreated by scripts/setup-toolchain.sh
+.tooling/
+local.properties
