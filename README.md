@@ -33,10 +33,28 @@ o zip uma única vez:
 1. Abra o app → **Importar ROM (.zip / .iso)** → escolha o zip baixado.
 2. O app descompacta em streaming para a memória privada (`downhill.iso`), com barra de
    progresso, checagem de CRC do zip e checagem de espaço livre (precisa de ~2,8 GB).
-3. No fim ele lê a estrutura ISO 9660 e mostra o serial: **SLES-53828 (PAL)** — prova que a
+3. No fim ele lê a estrutura ISO 9660 e mostra o serial: **SLES-52202 (PAL)** — prova que a
    imagem é o jogo certo, e não um zip corrompido.
 
 Para baixar e conferir o pacote pelo terminal: `scripts/fetch-rom.sh`.
+
+### Verificado com o arquivo real
+
+O caminho de importação do app foi executado contra o arquivo do seu link:
+
+```
+zip      : 2.421.295.952 bytes
+iso      : 2.771.025.920 bytes (extraído em 10,6 s)
+crc      : verificado pelo ZipInputStream (nenhum ZipException)
+label    : DOWNHILLDOMINATION
+boot2    : cdrom0:\SLES_522.02;1
+serial   : SLES-52202 (PAL)
+downhill : true
+```
+
+> Foi assim que o serial correto entrou no código: a primeira versão achava que era
+> `SLES-53828` e teria avisado "confira se é o jogo certo" para o arquivo certo. Hoje a
+> detecção usa o serial **e** o rótulo do volume (`DOWNHILL`).
 
 ## 3. Rodar
 

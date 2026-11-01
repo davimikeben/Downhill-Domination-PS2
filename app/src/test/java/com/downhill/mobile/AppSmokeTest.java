@@ -137,7 +137,7 @@ public class AppSmokeTest {
 
         // a small zip that carries a synthetic ISO with a PS2 boot id
         File zip = new File(activity.getCacheDir(), "downhill.zip");
-        byte[] iso = SyntheticIso.build("BOOT2 = cdrom0:\\SLES_538.28;1\r\n");
+        byte[] iso = SyntheticIso.build("BOOT2 = cdrom0:\\SLES_522.02;1\r\n");
         try (java.util.zip.ZipOutputStream z = new java.util.zip.ZipOutputStream(
                 new FileOutputStream(zip))) {
             z.putNextEntry(new java.util.zip.ZipEntry("Downhill Domination (Europe).iso"));
@@ -171,7 +171,7 @@ public class AppSmokeTest {
         com.downhill.mobile.rom.IsoInfo info =
                 (com.downhill.mobile.rom.IsoInfo) result[0];
         assertNotNull(info);
-        assertEquals("SLES-53828", info.serial);
+        assertEquals("SLES-52202", info.serial);
         assertTrue(info.downhillDomination);
     }
 

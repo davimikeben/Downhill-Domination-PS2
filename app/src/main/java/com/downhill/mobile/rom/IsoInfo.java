@@ -5,10 +5,15 @@ import java.util.Locale;
 /** What the importer learned about the disc image. */
 public final class IsoInfo {
 
-    /** Serial of "Downhill Domination (Europe)". */
-    public static final String SERIAL_EU = "SLES-53828";
+    /**
+     * Serial of "Downhill Domination (Europe)" - read straight out of the archive
+     * the user shared (SYSTEM.CNF of the disc: {@code cdrom0:\SLES_522.02;1}).
+     */
+    public static final String SERIAL_EU = "SLES-52202";
     /** Serial of "Downhill Domination (USA)". */
     public static final String SERIAL_US = "SLUS-20705";
+    /** Marker that shows up in the volume label of every Downhill Domination disc. */
+    public static final String VOLUME_MARKER = "DOWNHILL";
 
     public final String volumeLabel;
     public final String boot2;
@@ -43,9 +48,10 @@ public final class IsoInfo {
         }
         String serial = serialOf(file);
         String region = regionOf(serial);
-        boolean yes = SERIAL_EU.equals(serial) || SERIAL_US.equals(serial);
-        return new IsoInfo(volumeLabel == null ? "" : volumeLabel.trim(), boot2.trim(), file,
-                serial, region, yes);
+        String label = volumeLabel == null ? "" : volumeLabel.trim();
+        boolean yes = SERIAL_EU.equals(serial) || SERIAL_US.equals(serial)
+                || label.toUpperCase(java.util.Locale.ROOT).contains(VOLUME_MARKER);
+        return new IsoInfo(label, boot2.trim(), file, serial, region, yes);
     }
 
     /** {@code SLES_538.28} -&gt; {@code SLES-53828}. Returns "" when the name has no id. */

@@ -61,8 +61,12 @@ public class IsoParserTest {
         return len;
     }
 
-    /** 32 sectors: PVD at 16, root dir at 20, SYSTEM.CNF content at 21. */
     private static byte[] syntheticIso(String bootLine) {
+        return syntheticIso(bootLine, "DOWNHILL_DOMINATION");
+    }
+
+    /** 32 sectors: PVD at 16, root dir at 20, SYSTEM.CNF content at 21. */
+    private static byte[] syntheticIso(String bootLine, String volumeLabel) {
         byte[] iso = new byte[34 * SECTOR];
 
         int pvd = 16 * SECTOR;
@@ -70,7 +74,7 @@ public class IsoParserTest {
         byte[] magic = "CD001".getBytes(StandardCharsets.US_ASCII);
         System.arraycopy(magic, 0, iso, pvd + 1, 5);
         iso[pvd + 6] = 1;
-        byte[] label = "DOWNHILL_DOMINATION".getBytes(StandardCharsets.US_ASCII);
+        byte[] label = volumeLabel.getBytes(StandardCharsets.US_ASCII);
         System.arraycopy(label, 0, iso, pvd + 40, label.length);
         dirRecord(iso, pvd + 156, 20, SECTOR, true, "", true);
 
@@ -96,12 +100,12 @@ public class IsoParserTest {
 
     @Test
     public void readsTheEuropeanBootId() throws IOException {
-        byte[] iso = syntheticIso("BOOT2 = cdrom0:\\SLES_538.28;1\r\nVER = 1.00\r\nVMODE = NTSC\r\n");
+        byte[] iso = syntheticIso("BOOT2 = cdrom0:\\SLES_522.02;1\r\nVER = 1.00\r\nVMODE = PAL\r\n");
         IsoInfo info = IsoParser.parse(reader(iso));
         assertNotNull(info);
         assertEquals("DOWNHILL_DOMINATION", info.volumeLabel);
-        assertEquals("SLES_538.28", info.bootFile);
-        assertEquals("SLES-53828", info.serial);
+        assertEquals("SLES_522.02", info.bootFile);
+        assertEquals("SLES-52202", info.serial);
         assertEquals("PAL", info.region);
         assertTrue("must be recognised as Downhill Domination", info.downhillDomination);
     }
@@ -118,11 +122,20 @@ public class IsoParserTest {
 
     @Test
     public void anotherGameIsImportedButNotClaimedAsDownhill() throws IOException {
-        byte[] iso = syntheticIso("BOOT2 = cdrom0:\\SLES_500.00;1\r\n");
+        byte[] iso = syntheticIso("BOOT2 = cdrom0:\\SLES_500.00;1\r\n", "SOME_OTHER_GAME");
         IsoInfo info = IsoParser.parse(reader(iso));
         assertNotNull(info);
         assertEquals("SLES-50000", info.serial);
         assertFalse(info.downhillDomination);
+    }
+
+    @Test
+    public void volumeLabelRescuesAnUnknownSerial() throws IOException {
+        byte[] iso = syntheticIso("BOOT2 = cdrom0:\\SLES_500.00;1\r\n");
+        IsoInfo info = IsoParser.parse(reader(iso));
+        assertNotNull(info);
+        // the synthetic disc is labelled DOWNHILL_DOMINATION, which is enough
+        assertTrue(info.downhillDomination);
     }
 
     @Test
@@ -133,10 +146,10 @@ public class IsoParserTest {
 
     @Test
     public void serialAndRegionHelpers() {
-        assertEquals("SLES-53828", IsoInfo.serialOf("SLES_538.28"));
+        assertEquals("SLES-52202", IsoInfo.serialOf("SLES_522.02"));
         assertEquals("SLUS-20705", IsoInfo.serialOf("SLUS_207.05"));
         assertEquals("", IsoInfo.serialOf("NOIDEOFGAME"));
-        assertEquals("PAL", IsoInfo.regionOf("SLES-53828"));
+        assertEquals("PAL", IsoInfo.regionOf("SLES-52202"));
         assertEquals("NTSC-U", IsoInfo.regionOf("SLUS-20705"));
         assertEquals("NTSC-J", IsoInfo.regionOf("SLPS-25888"));
         assertEquals("?", IsoInfo.regionOf("XX"));
