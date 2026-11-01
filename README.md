@@ -18,7 +18,7 @@ com **emoji em cada tecla**, e traz ajustes prontos para rodar em **GPU fraca (M
 **[⬇ DownhillDominationMobile-1.0.1.apk](https://github.com/davimikeben/Downhill-Domination-PS2/releases/download/v1.0.1/DownhillDominationMobile-1.0.1.apk)**
 
 Instale no celular (Android 7.0+ / `minSdk 24`). O APK é **assinado** (esquema v2) e não
-pede root. `sha256 8b9c485e6378da8f6ebfca99622d525a5b18a2034f66a0cc428461a92ac6610d`.
+pede root. `sha256 3c51a73864fc0158e9824584d3e6961857c5f88493182c7d4eef9bd1d3f46477`.
 
 ## 2. O jogo
 

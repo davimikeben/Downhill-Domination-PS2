@@ -308,11 +308,12 @@ public class MainActivity extends Activity {
     // --------------------------------------------------------------- import --
 
     private void pickRom() {
+        // No MIME filter on purpose: some file managers report a .zip as
+        // "application/x-zip-compressed" or plain octet-stream, and a filtered
+        // picker would hide the user's archive. The importer checks the content.
         Intent i = new Intent(Intent.ACTION_OPEN_DOCUMENT);
         i.addCategory(Intent.CATEGORY_OPENABLE);
         i.setType("*/*");
-        i.putExtra(Intent.EXTRA_MIME_TYPES,
-                new String[]{"application/zip", "application/octet-stream", "application/x-iso9660-image"});
         try {
             startActivityForResult(i, REQ_PICK_ROM);
         } catch (android.content.ActivityNotFoundException e) {

@@ -26,7 +26,7 @@ Verificação executada neste repositório
 
 3) APK publicado
    v1.0.1 / DownhillDominationMobile-1.0.1.apk
-   sha256 8b9c485e6378da8f6ebfca99622d525a5b18a2034f66a0cc428461a92ac6610d
+   sha256 3c51a73864fc0158e9824584d3e6961857c5f88493182c7d4eef9bd1d3f46477
    apksigner: Verified using v2 scheme (APK Signature Scheme v2): true
    aapt2: package com.downhill.mobile versionCode=2 versionName=1.0.1 minSdk=24 targetSdk=34
           launchable-activity com.downhill.mobile.MainActivity
