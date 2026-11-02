@@ -1,0 +1,33 @@
+PAD DO DOWNHILL DOMINATION - GUIA DE INSTALACAO
+=============================================
+
+1. Instale o RetroArch no celular.
+2. Copie os dois arquivos desta pasta para:
+   Android/data/com.retroarch/files/overlays/downhill/
+3. RetroArch > Settings > On-Screen Display > On-Screen Overlay
+   > Overlay Preset > downhill-pad.cfg
+4. Em Settings > Input, deixe o Port 1 como RetroPad.
+5. Carregue o jogo com o nucleo LRPS2.
+
+Mapa das teclas (RetroPad):
+  ?? Cima -> btn_up  Equil?brio / empinar a bike ?
+  ?? Baixo -> btn_down  Agachar na bike para pegar velocidade ?
+  ?? Esq. -> btn_left  Inclinar / curvar para a esquerda ?
+  ?? Dir. -> btn_right  Inclinar / curvar para a direita ?
+  ? Tri?ngulo -> btn_x  Salto e manobras a?reas ?
+  ? C?rculo -> btn_a  Soco / ataque contra os rivais ?
+  ?? Xis -> btn_b  Pedalar / acelerar ?
+  ? Quadrado -> btn_y  Freio: segura a bike nas curvas ?
+  ? L1 -> btn_l  Manobra/truque com a m?o esquerda ?
+  ? R1 -> btn_r  Manobra/truque com a m?o direita ?
+  ? L2 -> btn_l2  Golpe lateral esquerdo ?
+  ? R2 -> btn_r2  Golpe lateral direito ?
+  ?? L3 -> btn_l3  Clique do anal?gico esquerdo: buzininha/reposicionar ??
+  ? R3 -> btn_r3  Clique do anal?gico direito: c?mera de r? ?
+  ?? Select -> btn_select  Mapa / placar da pista ??
+  ?? Start -> btn_start  Pausa e menu do jogo ??
+  ? Turbo -> turbo  Turbo autom?tico: repete o ?? rapidamente ?
+  ? Salvar -> save_state  Salvar estado r?pido do emulador ?
+  ? Carregar -> load_state  Carregar estado r?pido ?
+  ? Avan?ar -> fast_forward  Acelerar o tempo do emulador (fast-forward) ?
+  ?? Menu -> menu_toggle  Abrir os ajustes do teclado virtual ??

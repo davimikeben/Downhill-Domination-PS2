@@ -1,0 +1,75 @@
+plugins {
+    id 'com.android.application'
+}
+
+android {
+    namespace 'com.downhill.mobile'
+    compileSdk 34
+
+    defaultConfig {
+        applicationId 'com.downhill.mobile'
+        minSdk 24
+        targetSdk 34
+        versionCode 3
+        versionName '2.0.0'
+        resourceConfigurations += ['pt', 'en']
+    }
+
+    signingConfigs {
+        release {
+            storeFile file('../signing/downhill-release.jks')
+            storePassword 'downhill2026'
+            keyAlias 'downhill'
+            keyPassword 'downhill2026'
+        }
+    }
+
+    buildTypes {
+        debug {
+            applicationIdSuffix '.debug'
+            minifyEnabled false
+            debuggable true
+        }
+        release {
+            minifyEnabled true
+            shrinkResources true
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            signingConfig signingConfigs.release
+        }
+    }
+
+    buildFeatures {
+        buildConfig true
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+
+    packagingOptions {
+        resources.excludes += ['META-INF/*.kotlin_module', 'META-INF/*.version']
+    }
+
+    lint {
+        abortOnError false
+        checkReleaseBuilds false
+    }
+
+    testOptions {
+        unitTests {
+            includeAndroidResources = true
+            all {
+                it.testLogging { events 'passed', 'failed', 'skipped' }
+                it.jvmArgs '--add-opens=java.base/java.lang=ALL-UNNAMED',
+                        '--add-opens=java.base/java.util=ALL-UNNAMED',
+                        '--add-opens=java.base/java.io=ALL-UNNAMED'
+            }
+        }
+    }
+}
+
+dependencies {
+    testImplementation 'junit:junit:4.13.2'
+    testImplementation 'org.robolectric:robolectric:4.12.2'
+}

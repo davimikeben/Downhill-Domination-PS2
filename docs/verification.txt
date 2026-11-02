@@ -1,0 +1,41 @@
+Verificação executada neste repositório (2.0.0)
+===============================================
+
+1) Disco original do usuário (TransferNow)
+   zip      : 2.421.295.952 bytes -> iso 2.771.025.920 bytes (extração em 10,4 s, CRC ok)
+   label    : DOWNHILLDOMINATION
+   boot2    : cdrom0:\SLES_522.02;1
+   serial   : SLES-52202 (PAL)
+
+2) Conversão para CSO (tools/ciso.py)
+   iso      : 2.771.025.920 bytes
+   cso      : 2.500.420.488 bytes  (-9,8%)
+   header   : CISO, block=2048, v1, align=2 (offset >> 2, obrigatório acima de 2 GB)
+   observação: 93-96% dos setores não comprimem (áudio/vídeo já comprimidos) -> não existe
+   versão "em MB" deste jogo; o CSO é o menor formato que os núcleos de PS2 aceitam.
+
+3) Leitor CSO do app (codigo de producao) contra o CSO real
+   header   : CISO{total=2771025920 block=2048 v=1 align=2}
+   serial   : SLES-52202 (PAL) downhill=true
+   setores  : 0, 1.000.000 e 1.353.000 idênticos byte a byte ao ISO
+   => o leitor descomprime só o necessário e acha o SYSTEM.CNF
+
+4) Junção das 2 partes publicadas (codigo de producao, PartJoiner)
+   parte1   : 1.250.210.244 bytes
+   parte2   : 1.250.210.244 bytes
+   juntado  : 2.500.420.488 bytes
+   sha256   : 04f45b3c3ffc4c03c8a05adba78010c12a75090bd5a1370a38a3101bddc3326e
+              (idêntico ao CSO original)
+
+5) Testes automatizados: 54, 0 falhas
+   pad/PadGeometryTest, pad/Ps2ButtonTest, rom/IsoParserTest, rom/RomExtractorTest,
+   rom/CsoFileTest (inclui align=2), rom/PartJoinerTest, export/RetroArchOverlayTest,
+   emu/EmulatorTargetTest, emu/TuningProfileTest, AppSmokeTest (Robolectric),
+   PadRenderTest (Skia nativo: pad rasterizado, pixels e estado pressionado conferidos)
+
+6) APK publicado
+   DownhillDominationMobile-2.0.0.apk
+   versionCode 3 / versionName 2.0.0 / minSdk 24 / targetSdk 34
+   sha256 74684e72b728fb6a4c9b67f5440aed626eebb599bbea57c806d68c78e1dbfd6e
+   apksigner: "Verifies" (APK Signature Scheme v2)
+   assets da release: 2 partes CSO (1.250.210.244 cada), APK, 2 previews do pad
